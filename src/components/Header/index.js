@@ -2,6 +2,7 @@ import { useMoralis } from "react-moralis";
 import { useState } from "react";
 import { AiOutlineCopy } from "react-icons/ai";
 import { FaBeer } from "react-icons/fa";
+import UAuth from "@uauth/js";
 import {
   Button,
   Badge,
@@ -19,6 +20,56 @@ import { DropButton, Menu } from "grommet";
 import { truncateAddress } from "../../utils/shortAddy";
 
 export default function Header() {
+  const uauth = new UAuth({
+    clientID: process.env.REACT_APP_CLIENT_ID,
+    clientSecret: process.env.REACT_APP_CLIENT_SECRET,
+    redirectUri: process.env.REACT_APP_REDIRECT_URI,
+    scope: "openid wallet",
+  });
+
+  const App = () => {
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState();
+    const [user, setUser] = useState();
+
+    useEffect(() => {
+      setLoading(true);
+      uauth
+        .user()
+        .then(setUser)
+        .catch(() => {})
+        .finally(() => setLoading(false));
+    }, []);
+
+    const handleLogin = () => {
+      setLoading(true);
+      uauth
+        .loginWithPopup()
+        .then(() => uauth.user().then(setUser))
+        .catch(setError)
+        .finally(() => setLoading(false));
+    };
+
+    const handleLogout = () => {
+      setLoading(true);
+      uauth
+        .logout()
+        .then(() => setUser(undefined))
+        .catch(setError)
+        .finally(() => setLoading(false));
+    };
+
+    if (loading) {
+    }
+
+    if (error) {
+      console.error(error);
+      return <App />;
+    }
+
+    if (user) {
+    }
+  };
   const {
     authenticate,
     isAuthenticated,

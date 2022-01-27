@@ -127,56 +127,6 @@ export default function PostForm() {
     },
   });
 
-  // Test code
-  async function createSale(url) {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-
-    let contract = new ethers.Contract(nftaddress, NFT.abi, signer);
-    let transaction = await contract.createToken(url);
-    let tx = await transaction.wait();
-    let event = tx.events[0];
-    let value = event.args[2];
-    let tokenId = value.toNumber();
-    const price = web3.utils.toWei(String(highlight.price), "ether");
-
-    const listingPrice = web3.utils.toWei("0.01", "ether");
-
-    contract = new ethers.Contract(nftmarketaddress, Market.abi, signer);
-
-    transaction = await contract.createMarketItem(nftaddress, tokenId, price, {
-      value: listingPrice,
-    });
-
-    await transaction.wait();
-    router.push("/");
-  }
-
-  async function createMarket() {
-    /*if (
-      !highlight.title ||
-      highlight.description ||
-      !highlight.price ||
-      !fileUrl
-    )*/
-    console.log(highlight.title + " was created");
-    // first, upload to IPFS
-    const data = JSON.stringify({
-      name: highlight.title,
-      description: highlight.description,
-      image: fileUrl,
-    });
-    try {
-      // Uploading to ipfs
-      const added = await client.add(data);
-      const url = `https://ipfs.infura.io/ipfs/${added.path}`;
-      createSale(url);
-    } catch (err) {
-      console.log("Error uploading file: ", err.message);
-    }
-  }
-
-  // Test code
   return (
     <>
       <Header />
