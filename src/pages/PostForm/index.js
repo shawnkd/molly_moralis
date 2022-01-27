@@ -19,10 +19,10 @@ export default function PostForm() {
   const Moralis = require("moralis");
   const [Error, setError] = useState("");
   const [fileUrl, setFileUrl] = useState(null);
-  const [description, setDescription] = useState("");
-  const [editions, setEditions] = useState("");
-  const [price, setPrice] = useState("");
-  const [submit, setSubmit] = useState(false);
+  // const [description, setDescription] = useState("");
+  // const [editions, setEditions] = useState("");
+  // const [price, setPrice] = useState("");
+  // const [submit, setSubmit] = useState(false);
 
   const { user } = useMoralis();
 
@@ -47,28 +47,27 @@ export default function PostForm() {
         base64: btoa(JSON.stringify(highlight)),
       });
       //save video w Moralis Object
-      
-      const highlightFile = new Moralis.Object("HighlightVideo")
-      console.log("created moralis object")
+
+      const highlightFile = new Moralis.Object("HighlightVideo");
+      console.log("created moralis object");
       highlightFile.set("title", highlight.title);
-      highlightFile.set("video", vidfile)
+      highlightFile.set("description", highlight.description);
+      highlightFile.set("video", vidfile);
+      highlightFile.set("edition", highlight.editions);
+      highlightFile.set("price", highlight.price);
       const uploadedVid = await highlightFile.save();
       console.log(uploadedVid);
-      console.log('uploaded video to cloud')
-      
-      
-      
-
+      console.log("uploaded video to cloud");
       const savedFile = await jsonfile.saveIPFS();
       console.log("i saved this file first", savedFile);
       console.log("saved json to ipfs");
     } catch (err) {
       setError(err);
-      console.log("error error error error");
+      console.log("error error error error", Error);
     }
   };
 
-  const { error, isUploading, moralisFile, saveFile } = useMoralisFile();
+  //const { error, isUploading, moralisFile, saveFile } = useMoralisFile();
   // adding files
   async function onChange(e) {
     const file = e.target.files[0];
@@ -83,7 +82,7 @@ export default function PostForm() {
       file = null;
       setFileUrl(null);
       setError(error);
-      console.log("Error uploading file: ", error);
+      console.log("Error uploading file: ", Error);
     }
   }
 
@@ -121,7 +120,7 @@ export default function PostForm() {
           editions: values.editions,
           price: values.price,
         });
-        await saveAsset()
+        await saveAsset();
         //   console.log(values.title)
         //   console.log(values.description)
         //   console.log(values.file)

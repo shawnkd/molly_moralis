@@ -2,7 +2,7 @@ import { Button, Heading, InputGroup } from "@chakra-ui/react";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import styles from "../../styles/Home.module.css";
-import React from "react";
+import React, { useEffect } from "react";
 import Paper from "@material-ui/core/Paper";
 import Tab from "@material-ui/core/Tab";
 import Tabs from "@material-ui/core/Tabs";
@@ -16,14 +16,18 @@ import { ethers } from "ethers";
 import { useMoralisFile, useMoralis } from "react-moralis";
 import { Input } from "degen";
 const client = ipfsHttpClient("https://ipfs.infura.io:5001/api/v0");
-
+const Moralis = require("moralis");
 export default function Profile() {
   const [fileUrl, setFileUrl] = useState(null);
   const [value, setValue] = React.useState(0);
+  const [Error, setError] = React.useState(null);
+  const [pic, setPic] = useState();
   var file;
+  let profilePic;
+
   async function onChange(e) {
     file = e.target.files[0];
-    setshowFile(false);
+
     try {
       const added = await client.add(file, {
         progress: (prog) => console.log(`received: ${prog}`),
@@ -34,38 +38,87 @@ export default function Profile() {
       console.log("Error uploading file: ", error);
     }
   }
-  const {
-    authenticate,
-    isAuthenticated,
-    logout,
-    user,
-    isWeb3Enabled,
-    enableWeb3,
-  } = useMoralis();
 
-  const ShowFile = () => {
-    console.log(fileUrl);
-    if (fileUrl !== null) {
-      return (
-        <img
-          alt=""
-          className="rounded mt-4"
-          style={{ height: "320px", width: "350px" }}
-          src={fileUrl}
-        />
-      );
+  const { isInitialized, isAuthenticated, user } = useMoralis();
+  // const ShowFile = () => {
+  //   console.log(fileUrl);
+  // if (fileUrl !== null) {
+
+  // }
+  // };
+
+  const setMode = async () => {
+    if (fileUrl === null) return;
+    // showFile();
+    // setshowFile(true);
+    try {
+      profilePic = new Moralis.Object("profilePic");
+      console.log("created moralis object");
+      profilePic.set("owner", user.get("ethAddress"));
+      profilePic.set("pic", fileUrl);
+      const uploadedPFP = await profilePic.save();
+      console.log(uploadedPFP);
+      console.log("uploaded a profile pic");
+    } catch (e) {
+      setError(e);
     }
   };
-  const setMode = () => setshowFile(true);
-  const [showFile, setshowFile] = useState(false);
 
+  useEffect(() => {
+    if (isInitialized && isAuthenticated) {
+      //showFile();
+      LoadPic();
+    }
+  }, [isInitialized, isAuthenticated]);
+
+  async function LoadPic() {
+    const fetchpic = new Moralis.Query("profilePic");
+    let test = await fetchpic.subscribe();
+    console.log(test);
+    await fetchpic.equalTo("owner", user.get("ethAddress"));
+    const picresult = await fetchpic.find();
+    // console.log(picresult);
+    if (picresult.length < 1) return;
+    setPic(picresult[picresult.length - 1].get("pic"));
+    console.log(pic);
+    /*
+      profilePic.equalTo("owner", user.get("ethAddress"));
+    const result = await profilePic.find();
+    const fileurl = result[0].get("fileUrl");
+    console.log(fileurl);
+    */
+  }
   return (
     <>
       <Header />
       <br />
-      <Heading className={styles.head}>Profile</Heading>
+      {isAuthenticated ? (
+        <Heading className={styles.head}>Profile</Heading>
+      ) : null}
       <main className={styles.main}>
-        {showFile && isAuthenticated ? <ShowFile /> : null}
+        {isAuthenticated ? (
+          <div>
+            {fileUrl !== null ? (
+              <img
+                alt=""
+                className="rounded mt-4"
+                style={{ height: "320px", width: "350px" }}
+                src={fileUrl}
+              />
+            ) : (
+              <>
+                {pic !== undefined ? (
+                  <img
+                    alt=""
+                    className="rounded mt-4"
+                    style={{ height: "320px", width: "350px" }}
+                    src={pic}
+                  />
+                ) : null}{" "}
+              </>
+            )}
+          </div>
+        ) : null}
         <br />
         {isAuthenticated ? (
           <>

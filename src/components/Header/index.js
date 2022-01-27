@@ -1,5 +1,5 @@
 import { useMoralis } from "react-moralis";
-import { useState } from "react";
+import { useRouter } from "next/router";
 import { AiOutlineCopy } from "react-icons/ai";
 import { FaBeer } from "react-icons/fa";
 import {
@@ -19,6 +19,7 @@ import { DropButton, Menu } from "grommet";
 import { truncateAddress } from "../../utils/shortAddy";
 
 export default function Header() {
+  const router = useRouter();
   const {
     authenticate,
     isAuthenticated,
@@ -138,7 +139,10 @@ export default function Header() {
                           border={false}
                           rounded={false}
                           colorScheme="blue"
-                          onClick={logout}
+                          onClick={() => {
+                            logout();
+                            router.push("/");
+                          }}
                         >
                           {" "}
                           Logout{" "}
@@ -152,7 +156,13 @@ export default function Header() {
               {/* <h2>Welcome {user.get("username")}</h2> */}
               {/* <h1>Logged in as:</h1> */}
 
-              <Button colorScheme="blue" onClick={logout}>
+              <Button
+                colorScheme="blue"
+                onClick={() => {
+                  logout();
+                  router.push("/");
+                }}
+              >
                 {" "}
                 Logout{" "}
               </Button>
