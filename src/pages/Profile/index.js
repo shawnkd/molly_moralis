@@ -18,6 +18,58 @@ import { Input } from "degen";
 const client = ipfsHttpClient("https://ipfs.infura.io:5001/api/v0");
 const Moralis = require("moralis");
 export default function Profile() {
+  const [values, setValues] = useState({
+    tokenAddress: "0xb9c6e785695c9f13e399a89bf04e124d6415b0a8",
+    tokenId: "1",
+  });
+
+  const getAsset = async () => {
+    const res = await Moralis.Plugins.opensea.getAsset({
+      network: "testnet",
+      tokenAddress: values.tokenAddress,
+      tokenId: values.tokenId,
+    });
+    console.log(res);
+  };
+
+  const getOrder = async () => {
+    const res = await Moralis.Plugins.opensea.getOrders({
+      network: "testnet",
+      tokenAddress: values.tokenAddress,
+      tokenId: values.tokenId,
+      orderSide: 0,
+      page: 1, // pagination shows 20 orders each page
+    });
+    console.log(res);
+  };
+
+  const createSellOrder = async () => {
+    await Moralis.Plugins.opensea.createSellOrder({
+      network: "testnet",
+      tokenAddress: values.tokenAddress,
+      tokenId: values.tokenId,
+      amount: 0.0001,
+      tokenType: "ERC721",
+      userAddress: user.get("ethAddress"),
+      paymentTokenAddress: "0xc778417e063141139fce010982780140aa0cd5ab", // Only set if you startAmount > endAmount
+    });
+
+    console.log("Create Sell Order Successful");
+  };
+  const createBuyOrder = async () => {
+    await Moralis.Plugins.opensea.createBuyOrder({
+      network: "testnet",
+      tokenAddress: values.tokenAddress,
+      tokenId: values.tokenId,
+      tokenType: "ERC721",
+      amount: 0.0001,
+      userAddress: user.get("ethAddress"),
+      paymentTokenAddress: "0xc778417e063141139fce010982780140aa0cd5ab",
+    });
+
+    console.log("Create Buy Order Successful");
+  };
+
   const [fileUrl, setFileUrl] = useState(null);
   const [value, setValue] = React.useState(0);
   const [Error, setError] = React.useState(null);
@@ -70,6 +122,7 @@ export default function Profile() {
       LoadPic();
     }
   }, [isInitialized, isAuthenticated]);
+  const handleSubmit = () => {};
 
   async function LoadPic() {
     const fetchpic = new Moralis.Query("profilePic");
@@ -150,6 +203,41 @@ export default function Profile() {
           <>
             {user.get("ethAddress")}
             <br />
+            <br />
+            <div id="login">
+              <form onSubmit={handleSubmit}>
+                <label>
+                  NFT contract address:&nbsp;
+                  <input
+                    type="text"
+                    value={values.tokenAddress}
+                    onChange={(e) =>
+                      setValues({ tokenAddress: e.target.value })
+                    }
+                  />
+                  <br />
+                  <br />
+                  Token Id: &nbsp;
+                  <input
+                    type="text"
+                    value={values.tokenId}
+                    onChange={(e) => setValues({ tokenId: e.target.value })}
+                  />
+                </label>
+              </form>
+            </div>
+            <br />
+            <Button onClick={getAsset}>get Asset with opensea plugin</Button>
+            <br />
+            <Button onClick={getOrder}>get Order with opensea plugin</Button>
+            <br />
+            <Button onClick={createSellOrder}>
+              createSellOrder with opensea plugin
+            </Button>
+            <br />
+            <Button onClick={createBuyOrder}>
+              createBuyOrder with opensea plugin
+            </Button>
             <br />
             <div className="">
               <div>

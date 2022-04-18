@@ -1,6 +1,7 @@
 import { Card, Video, Button, CardFooter } from "grommet";
 //import { Favorite, Play, Chat, Like } from "grommet-icons";
 import { useState } from "react";
+import Header from "../../components/Header";
 import ReactPlayer from "react-player";
 import { Center, Text, VStack, HStack, Flex, Spacer } from "@chakra-ui/react";
 //import { Value } from "grommet-controls";
@@ -13,11 +14,10 @@ export default function Post() {
   };
   return (
     <>
-      <Card height="450px" width="700px" background="dark-1">
+      <Card height="450px" width="800px" pad="large" background="dark-1">
         <Center>
           <Text pt="4">Stream Highlight</Text>
         </Center>
-        <ReactPlayer />
 
         {/*} <Video controls="over" fit="cover">
           <source
